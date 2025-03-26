@@ -24,3 +24,6 @@ elif num > 1:
         print(num, "is not a prime number")
     else:
         print(num, "is a prime number")
+
+
+print('this is the code to check if the number is prime or not")
