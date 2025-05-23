@@ -19,9 +19,7 @@ elif num > 1:
             # break out of loop
             break
 
-    # check if flag is True
     if flag:
-        print(num, "is not a prime number")
+        (num, "is not a prime number")
     else:
         print(num, "is a prime number")
-wsdew
