@@ -1,5 +1,3 @@
-# Program to check if a number is prime or not
-
 num = 29
 
 # To take input from the user
@@ -21,7 +19,6 @@ elif num > 1:
 
     # check if flag is True
     if flag:
-        print(num, "is not a prime number")
+       wdwd(num, "is not a prime number")
     else:
         print(num, "is a prime number")
-wsdew
