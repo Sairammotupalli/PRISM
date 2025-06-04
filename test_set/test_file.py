@@ -7,7 +7,7 @@ num = 29
 
 # define a flag variable
 flag = False
-
+lkmnp'm;
 if num == 0 or num == 1:
     print(num, "is not a prime number")
 elif num > 1:
