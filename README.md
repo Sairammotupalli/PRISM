@@ -6,7 +6,7 @@ PRISM is an In-built tool that analyzes and score the pull request created using
 # Setup
 
 ## 1. clone the repository(terminal 1):
-    https://github.com/The-Cloud-Lab/PRISM.git
+    git clone https://github.com/The-Cloud-Lab/PRISM.git
     
 ## Move to the directory
     cd PRISM
