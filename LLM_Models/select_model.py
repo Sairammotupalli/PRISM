@@ -9,7 +9,7 @@ MODEL_MAP = {
 }
 
 def main():
-    model = "deepseek-r1"
+    model = "claude"
     path = MODEL_MAP.get(model)
     
     if not path:
