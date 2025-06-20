@@ -1,8 +1,15 @@
 import os
 import sys
 import json
-import openai
+import anthropic
+from anthropic import Anthropic
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
+if not ANTHROPIC_API_KEY:
+    print("Error: ANTHROPIC_API_KEY environment variable not set.")
+    sys.exit(1)
+
+# Initialize the Anthropic client
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 anthropic_client = Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -120,49 +127,34 @@ efficiency_score: -1 (Poor) The code reduces the time or space complexity and do
     
 def analyze_with_llm(pr_number, prompt):
     try:
+        print(f"Sending request to Claude for PR_ID: {pr_number}")
         message = client.messages.create(
-        model="claude-3-7-sonnet-20250219",
-        max_tokens=2048,
-        system="Respond only in JSON format with keys: efficiency_score and output.",
-        messages=[{"role": "user", "content": prompt}]
+            model="claude-3-7-sonnet-20250219",
+            max_tokens=2048,
+            system="Respond only in JSON format with keys: readability_score, robustness_score, security_score, efficiency_score, output.",
+            messages=[{"role": "user", "content": prompt}]
+        )
 
-   ) 
-        print(f"\n===== Raw Response from LLM (PR_ID {pr_id}) =====\n")
-        print(message.content[0].text)
+        response_text = message.content[0].text
+        print(f"\n===== Raw Response from Claude (PR_ID {pr_number}) =====\n")
+        print(response_text)
 
-        return message.content[0].text
-    
-    except Exception as e:
-        print(f"Error processing prompt for {repo_name} PR_ID {pr_id}: {e}")
-        return None
+        # Try to parse the response as JSON
+        try:
+            response_json = json.loads(response_text)
+        except json.JSONDecodeError:
+            print("Error: Claude's response is not valid JSON.")
+            return "Error: Invalid JSON returned by Claude."
 
-if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        sys.exit(1)
-
-    diff_file_path = sys.argv[1]
-    pr_number = sys.argv[2]
-
-    try:
-        with open(diff_file_path, "r") as f:
-            diff_content = f.read().strip()
-        
-        if not diff_content:
-            print("Warning: Diff file empty.")
-            pr_body = "No changes detected."
-        else:
-            prompt = generate_pr_description(diff_content, pr_number)
-	    pr_body = analyze_with_llm(pr_number, prompt)
-
-        with open("pr_description.txt", "w") as f:
-            f.write(pr_body)
-
-        print("PR description saved successfully.")
-
-    except FileNotFoundError:
-        print(f"Error: Diff file '{diff_file_path}' not found.")
-        sys.exit(1)
+        # Format the final output string
+        return (
+            f"Readability Score: {response_json.get('readability_score')}\n"
+            f"Robustness Score: {response_json.get('robustness_score')}\n"
+            f"Security Score: {response_json.get('security_score')}\n"
+            f"Efficiency Score: {response_json.get('efficiency_score')}\n"
+            f"\nExplanation:\n{response_json.get('output')}"
+        )
 
     except Exception as e:
-        print(f"Unexpected Error: {e}")
-        sys.exit(1)
+        print(f"Error processing prompt for PR_ID {pr_number}: {e}")
+        return "Error: Unable to process with Claude."
