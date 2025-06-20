@@ -18,7 +18,8 @@ def generate_pr_description(diff_content, pr_number):
 
 The return format should be in the below json format:
 {{
-    "readability_score": “<score>”
+    "readability_score": “<score>”,
+    "output": "<text explanation for the score>”
 }}
 
 Be careful while analyzing the code. Make sure to identify all the code changes and double-check the answer. Use the checkboxes and scoring criteria below while assigning the score.
@@ -44,7 +45,8 @@ readability_score: -1 (Poor) Code is highly unreadable.
 
 The return format should be in the below json format:
 {{
-    "robustness_score": “<score>”
+    "robustness_score": “<score>”,
+    "output": "<text explanation for the score>”
 }}
 
 Be careful while analyzing the code. Make sure to identify all the code changes and double-check the answer. Use the checkboxes and scoring criteria below while assigning the score.
@@ -68,7 +70,8 @@ Scoring Criteria:
 3. Analyze and give an overall score for the updated code based on Security and Vulnerability. 
 The return format should be in the below json format:
 {{
-    "security_score": “<score>”
+    "security_score": “<score>”,
+    "output": "<text explanation for the score>”
 }}
 
 Be careful while analyzing the code. Make sure to identify all the code changes and double-check the answer. Use the checkboxes and scoring criteria below while assigning the score.
@@ -94,7 +97,8 @@ Scoring Criteria:
 
 The return format should be in the below json format:
 {{
-    "performance_score": “<score>”
+    "performance_score": “<score>”,
+    "output": "<text explanation for the score>”
 }}
 
 Be careful while analyzing the code. Make sure to identify all the code changes and double-check the answer. Use the checkboxes and scoring criteria below while assigning the score.
