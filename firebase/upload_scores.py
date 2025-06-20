@@ -1,80 +1,90 @@
-import os
+import sys
 import json
-import argparse
 import requests
+import os
 
-def get_llm_scores(directory):
-    """Parses scores from JSON files in the specified directory."""
-    scores = {}
-    if not os.path.isdir(directory):
-        print(f"Error: Scores directory not found at '{directory}'")
-        return None
-    for filename in os.listdir(directory):
-        if filename.endswith('_scores.json'):
-            try:
-                with open(os.path.join(directory, filename), 'r') as f:
-                    data = json.load(f)
-                    scores.update(data)
-            except (json.JSONDecodeError, IOError) as e:
-                print(f"Error reading or parsing {filename}: {e}")
-    return scores
+def update_firebase(user, pr_id, new_scores, firebase_url, model, repo_name):
+    # Sanitize the repo_name to be a valid Firebase key
+    safe_repo_name = repo_name.replace('/', '--')
+    base_url = f"{firebase_url}/repositories/{safe_repo_name}/users/{user}"
+    pr_url = f"{base_url}/pr_{pr_id}.json"
+    cumulative_url = f"{base_url}/cumulative_score.json"
 
-def upload_to_firebase(firebase_url, repo_name, user, pr_id, pr_title, scores, model_name):
-    """Uploads scores to Firebase RTDB using the REST API."""
-    if not all([firebase_url, repo_name, user, pr_id, pr_title, scores, model_name]):
-        print("Error: Missing one or more required arguments for Firebase upload.")
+    pr_data = new_scores.copy()
+    pr_data["model"] = model
+
+    print(f"Uploading scores to: {pr_url}")
+    pr_response = requests.put(pr_url, json=pr_data)
+    if pr_response.ok:
+        print(f"Scores for PR #{pr_id} uploaded.")
+    else:
+        print(f"Failed to upload PR scores: {pr_response.text}")
         return
 
-    # Firebase keys cannot contain '.', '#', '$', '[', or ']'
-    # The REST API can handle the '/' in the repo name directly in the URL path.
-    # We still sanitize the user and pr_id just in case.
-    safe_user = user.replace('.', '_')
-    safe_pr_id = pr_id.replace('.', '_')
-    
-    # Construct the REST API URL
-    url = f"{firebase_url}/repositories/{repo_name}/users/{safe_user}/{safe_pr_id}.json"
-    
-    upload_data = {
-        'pr_title': pr_title,
-        'readability_score': scores.get('readability_score'),
-        'robustness_score': scores.get('robustness_score'),
-        'efficiency_score': scores.get('efficiency_score'),
-        'security_score': scores.get('security_score'),
-        'model': model_name
-    }
-    
-    try:
-        response = requests.put(url, json=upload_data)
-        response.raise_for_status()  # Raises an exception for 4xx/5xx errors
-        print(f"Successfully uploaded scores for PR #{pr_id} to repo {repo_name}.")
-        print(f"Data: {upload_data}")
-    except requests.exceptions.RequestException as e:
-        print(f"Failed to upload to Firebase: {e}")
-        print(f"Response Body: {response.text if 'response' in locals() else 'No response'}")
+    # Update cumulative score
+    existing = requests.get(cumulative_url).json() or {}
+    pr_count = existing.get("pr_count", 0)
 
-def main():
-    """Main function to parse args and trigger upload."""
-    firebase_url = os.getenv("FIREBASE_URL")
-    if not firebase_url:
-        print("Error: FIREBASE_URL environment variable is not set.")
-        exit(1)
+    updated = {}
+    for key in new_scores:
+        prev_val = existing.get(key, 0)
+        updated[key] = (prev_val * pr_count + new_scores[key]) / (pr_count + 1)
 
-    parser = argparse.ArgumentParser(description="Parse LLM scores and upload to Firebase via REST API.")
-    parser.add_argument("--repo_name", required=True, help="Repo name (e.g., 'owner/repo').")
-    parser.add_argument("--user", required=True, help="GitHub username.")
-    parser.add_argument("--pr_id", required=True, help="Pull Request ID.")
-    parser.add_argument("--pr_title", required=True, help="Pull Request title.")
-    parser.add_argument("--model_name", required=True, help="Name of the scoring model.")
-    parser.add_argument("--scores_dir", default="scores", help="Directory with score files.")
-    
-    args = parser.parse_args()
-    
-    scores = get_llm_scores(args.scores_dir)
-    
-    if scores:
-        upload_to_firebase(firebase_url, args.repo_name, args.user, args.pr_id, args.pr_title, scores, args.model_name)
+    updated["pr_count"] = pr_count + 1
+
+    print(f"Updating cumulative score at: {cumulative_url}")
+    cum_response = requests.put(cumulative_url, json=updated)
+    if cum_response.ok:
+        print("Cumulative score updated.")
     else:
-        print("No valid scores found. Skipping Firebase upload.")
+        print(f"Failed to update cumulative score: {cum_response.text}")
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    if len(sys.argv) < 6:
+        print("Usage: python upload_scores.py <pr_message_file> <github_user> <pr_id> <model> <repo_name>")
+        sys.exit(1)
+
+    pr_file = sys.argv[1]
+    user = sys.argv[2]
+    pr_id = sys.argv[3]
+    model = sys.argv[4]
+    repo_name = sys.argv[5] # Added repo_name
+    firebase_url = os.getenv("FIREBASE_URL")
+
+    if not firebase_url:
+        print("FIREBASE_URL is not set.")
+        sys.exit(1)
+
+    with open(pr_file, 'r') as f:
+        pr_data = f.read()
+
+    try:
+        scores = {
+            "readability_score": None,
+            "robustness_score": None,
+            "security_score": None,
+            "efficiency_score": None
+        }
+
+        for line in pr_data.splitlines():
+            if line.lower().startswith("readability score:"):
+                scores["readability_score"] = int(line.split(":")[1].strip())
+            elif line.lower().startswith("robustness score:"):
+                scores["robustness_score"] = int(line.split(":")[1].strip())
+            elif line.lower().startswith("security score:"):
+                scores["security_score"] = int(line.split(":")[1].strip())
+            elif line.lower().startswith("efficiency score:"):
+                scores["efficiency_score"] = int(line.split(":")[1].strip())
+
+        print("PR body snippet:")
+        print(pr_data[:300])
+        print(f"Extracted Scores: {scores}")
+
+        if all(v is not None for v in scores.values()):
+            update_firebase(user, pr_id, scores, firebase_url, model, repo_name)
+        else:
+            print("Not all scores found. Skipping Firebase upload.")
+
+    except Exception as e:
+        print(f"Failed to parse PR scores: {e}")
+        sys.exit(1)
