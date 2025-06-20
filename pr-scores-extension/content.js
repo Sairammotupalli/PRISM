@@ -240,9 +240,7 @@ function renderScores() {
     const prEntries = Object.entries(data)
       .filter(([key]) => key !== "cumulative_score")
       .filter(([prId, scores]) => {
-        const prTitle = scores.pr_title || '';
-        return prId.toLowerCase().includes(searchTerm) || 
-               prTitle.toLowerCase().includes(searchTerm);
+        return prId.toLowerCase().includes(searchTerm.toLowerCase());
       })
       .sort(([aKey, aVal], [bKey, bVal]) => {
         if (sortBy === 'model') return (aVal.model || '').localeCompare(bVal.model || '');
@@ -267,7 +265,7 @@ function renderScores() {
         <div class="pr-list">
           ${prEntries.map(([prId, scores]) => `
             <div class="pr-row">
-              <div class="pr-title">PR #${prId}: ${scores.pr_title || 'No title'}</div>
+              <div class="pr-title">PR #${prId.replace('pr_', '')}</div>
               <div class="pr-meta">Clarity: ${scores.readability_score || 'N/A'} | Robustness: ${scores.robustness_score || 'N/A'} | Efficiency: ${scores.efficiency_score || 'N/A'} | Security: ${scores.security_score || 'N/A'}</div>
               <div class="pr-score">${scores.model || 'N/A'}</div>
             </div>
