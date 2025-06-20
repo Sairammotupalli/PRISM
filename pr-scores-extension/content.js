@@ -78,13 +78,28 @@ function injectStyles() {
     .score-item:nth-child(3) { background-color: #dafbe1; color: #116329; border-color: #7ee787; }
     .score-item:nth-child(4) { background-color: #ffebe9; color: #cf222e; border-color: #ff8182; }
     .pr-list { padding: 0; }
-    .pr-row { padding: 12px 16px; border-bottom: 1px solid #d0d7de; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .pr-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 20px;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid #d0d7de;
+    }
     .pr-row:last-child { border-bottom: none; }
-    .pr-title { font-weight: 500; color: #0969da; font-size: 14px; }
-    .pr-meta { font-size: 12px; color: #57606a; flex: 1; }
-    .pr-score { font-size: 12px; color: #57606a; white-space: nowrap; }
+    .pr-title { font-weight: 600; color: #0969da; white-space: nowrap; font-size: 14px; }
+    .pr-meta {
+      text-align: center;
+      color: #57606a;
+      font-size: 13px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .pr-score { font-weight: 500; color: #24292e; white-space: nowrap; justify-self: end; }
     .loading, .error { text-align: center; padding: 40px; color: #57606a; }
     .error { color: #cf222e; }
+    h2 { margin-bottom: 16px; }
   `;
   document.head.appendChild(style);
 }
@@ -265,8 +280,13 @@ function renderScores() {
         <div class="pr-list">
           ${prEntries.map(([prId, scores]) => `
             <div class="pr-row">
-              <div class="pr-title">PR #${prId.replace('pr_', '')}</div>
-              <div class="pr-meta">Clarity: ${scores.readability_score || 'N/A'} | Robustness: ${scores.robustness_score || 'N/A'} | Efficiency: ${scores.efficiency_score || 'N/A'} | Security: ${scores.security_score || 'N/A'}</div>
+              <div class="pr-title">Pull Request #${prId.replace('pr_', '')}</div>
+              <div class="pr-meta">
+                <span>Clarity: ${scores.readability_score || 'N/A'}</span>
+                <span>Robustness: ${scores.robustness_score || 'N/A'}</span>
+                <span>Efficiency: ${scores.efficiency_score || 'N/A'}</span>
+                <span>Security: ${scores.security_score || 'N/A'}</span>
+              </div>
               <div class="pr-score">${scores.model || 'N/A'}</div>
             </div>
           `).join('')}
