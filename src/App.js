@@ -26,24 +26,38 @@ function App() {
     fetchData();
   }, []);
 
-  const calculateOverallScore = (userData) => {
-    let totalScore = 0;
+  const calculateCumulativeScores = (userData) => {
+    let readabilityTotal = 0;
+    let robustnessTotal = 0;
+    let efficiencyTotal = 0;
+    let securityTotal = 0;
     let prCount = 0;
 
     Object.entries(userData).forEach(([key, scores]) => {
       if (key !== 'cumulative_score') {
-        const avgScore = (
-          (scores.readability_score || 0) +
-          (scores.robustness_score || 0) +
-          (scores.efficiency_score || 0) +
-          (scores.security_score || 0)
-        ) / 4;
-        totalScore += avgScore;
+        readabilityTotal += scores.readability_score || 0;
+        robustnessTotal += scores.robustness_score || 0;
+        efficiencyTotal += scores.efficiency_score || 0;
+        securityTotal += scores.security_score || 0;
         prCount++;
       }
     });
 
-    return prCount > 0 ? (totalScore / prCount).toFixed(2) : 'N/A';
+    if (prCount === 0) {
+      return {
+        readability: 'N/A',
+        robustness: 'N/A',
+        efficiency: 'N/A',
+        security: 'N/A'
+      };
+    }
+
+    return {
+      readability: (readabilityTotal / prCount).toFixed(2),
+      robustness: (robustnessTotal / prCount).toFixed(2),
+      efficiency: (efficiencyTotal / prCount).toFixed(2),
+      security: (securityTotal / prCount).toFixed(2)
+    };
   };
 
   const sortedUsers = Object.entries(users).sort(([a], [b]) => {
@@ -101,7 +115,12 @@ function App() {
             <div key={user} className="user-section">
               <div className="user-header">
                 Contributor: {user}
-                <span className="overall-score">Overall Score: {calculateOverallScore(data)}</span>
+                <div className="cumulative-scores">
+                  <span className="score-item">Readability: {calculateCumulativeScores(data).readability}</span>
+                  <span className="score-item">Robustness: {calculateCumulativeScores(data).robustness}</span>
+                  <span className="score-item">Efficiency: {calculateCumulativeScores(data).efficiency}</span>
+                  <span className="score-item">Security: {calculateCumulativeScores(data).security}</span>
+                </div>
               </div>
 
               <div className="pr-list">

@@ -125,3 +125,44 @@
 .back-button:hover {
   background-color: #e2e6ea;
 }
+
+.cumulative-scores {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.score-item {
+  background-color: #f1f8ff;
+  color: #0969da;
+  padding: 0.25rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid #ddf4ff;
+}
+
+.score-item:nth-child(1) {
+  background-color: #ddf4ff;
+  color: #0969da;
+  border-color: #79c0ff;
+}
+
+.score-item:nth-child(2) {
+  background-color: #fff8dc;
+  color: #9a6700;
+  border-color: #fae17d;
+}
+
+.score-item:nth-child(3) {
+  background-color: #dafbe1;
+  color: #116329;
+  border-color: #7ee787;
+}
+
+.score-item:nth-child(4) {
+  background-color: #ffebe9;
+  color: #cf222e;
+  border-color: #ff8182;
+}
