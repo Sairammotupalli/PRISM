@@ -80,7 +80,7 @@ jobs:
               });
             }
 
-     - name: Upload Scores to Firebase
+      - name: Upload Scores to Firebase
         env:
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
