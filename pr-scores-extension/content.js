@@ -3,6 +3,7 @@
 let scoresData = {};
 let pageContainer = null;
 let isActive = false;
+let repoName = null;
 
 // Create and inject CSS styles
 function injectStyles() {
@@ -92,7 +93,15 @@ function injectStyles() {
 function getRepoMainContent() {
   // This selector might need updates if GitHub changes its layout.
   // It targets the container that holds the file browser, readme, etc.
-  return document.querySelector('.repository-content');
+  const repoContent = document.querySelector('.repository-content');
+  
+  // Also get the repo name from the URL
+  const pathParts = window.location.pathname.split('/').filter(p => p);
+  if (pathParts.length >= 2) {
+    repoName = `${pathParts[0]}/${pathParts[1]}`;
+  }
+  
+  return repoContent;
 }
 
 // Create the container for our UI
@@ -178,9 +187,19 @@ function hidePRScoresView() {
 // Fetch scores data
 async function fetchScores() {
   const contentArea = document.getElementById('pr-scores-content-area');
+  if (!repoName) {
+    contentArea.innerHTML = `<div class="error">Could not determine repository name from URL.</div>`;
+    return;
+  }
+
   try {
+    // Path: repositories/{repo_name}/users.json
+    const safeRepoName = repoName.replace('/', '--');
     const response = await new Promise((resolve, reject) => {
-      chrome.runtime.sendMessage({ action: 'fetchScores' }, (response) => {
+      chrome.runtime.sendMessage({ 
+        action: 'fetchScores',
+        repo: safeRepoName 
+      }, (response) => {
         if (chrome.runtime.lastError) reject(chrome.runtime.lastError);
         else resolve(response);
       });
@@ -205,17 +224,26 @@ function renderScores() {
   const searchTerm = document.getElementById('pr-scores-search').value.toLowerCase();
   const sortBy = document.getElementById('pr-scores-sort').value;
   
+  let headerHtml = `<h2>Scores for ${repoName}</h2>`;
+  if (!scoresData || Object.keys(scoresData).length === 0) {
+      contentArea.innerHTML = headerHtml + '<div class="loading">No scores found for this repository.</div>';
+      return;
+  }
+
   const sortedUsers = Object.entries(scoresData).sort(([a], [b]) => {
     if (sortBy === 'user') return a.localeCompare(b);
     return 0;
   });
   
   let html = '';
-  // (The HTML generation logic is the same as before)
   sortedUsers.forEach(([user, data]) => {
     const prEntries = Object.entries(data)
       .filter(([key]) => key !== "cumulative_score")
-      .filter(([prId, scores]) => prId.toLowerCase().includes(searchTerm) || (`Update ${prId}.py`).toLowerCase().includes(searchTerm))
+      .filter(([prId, scores]) => {
+        const prTitle = scores.pr_title || '';
+        return prId.toLowerCase().includes(searchTerm) || 
+               prTitle.toLowerCase().includes(searchTerm);
+      })
       .sort(([aKey, aVal], [bKey, bVal]) => {
         if (sortBy === 'model') return (aVal.model || '').localeCompare(bVal.model || '');
         return 0;
@@ -239,16 +267,16 @@ function renderScores() {
         <div class="pr-list">
           ${prEntries.map(([prId, scores]) => `
             <div class="pr-row">
-              <div class="pr-title">Pull Request: ${prId}</div>
-              <div class="pr-meta">Clarity: ${scores.readability_score} | Robustness: ${scores.robustness_score} | Efficiency: ${scores.efficiency_score} | Security: ${scores.security_score}</div>
-              <div class="pr-score">${scores.model}</div>
+              <div class="pr-title">PR #${prId}: ${scores.pr_title || 'No title'}</div>
+              <div class="pr-meta">Clarity: ${scores.readability_score || 'N/A'} | Robustness: ${scores.robustness_score || 'N/A'} | Efficiency: ${scores.efficiency_score || 'N/A'} | Security: ${scores.security_score || 'N/A'}</div>
+              <div class="pr-score">${scores.model || 'N/A'}</div>
             </div>
           `).join('')}
         </div>
       </div>`;
   });
   
-  contentArea.innerHTML = html || '<div class="loading">No scores found matching your search.</div>';
+  contentArea.innerHTML = headerHtml + (html || '<div class="loading">No scores found matching your search.</div>');
 }
 
 
@@ -279,6 +307,10 @@ function injectPRScoresTab() {
   const navBar = document.querySelector("ul.UnderlineNav-body");
   if (!navBar || document.querySelector("#pr-scores-tab")) return;
   
+  // Check if we are in a repository context
+  const repoNameParts = window.location.pathname.split('/').filter(p => p);
+  if (repoNameParts.length < 2) return; // Not in a repo
+
   const li = document.createElement("li");
   li.setAttribute("data-view-component", "true");
   li.className = "d-inline-flex";
