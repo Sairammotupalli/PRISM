@@ -91,11 +91,11 @@ Scoring Criteria:
     
     prompt+="""
     
-4. And Give an overall score for the updated based on Performance and Efficiency. 
+4. And Give an overall score for the updated based on performance and efficiency. 
 
 The return format should be in the below json format:
 {{
-    "performance_score": “<score>”,
+    "efficiency_score": “<score>”,
     "output": "<text explanation for the score>”
 }}
 
@@ -110,9 +110,9 @@ Checkboxes:
 
 
 Scoring Criteria:
-performance_score: 1 (Excellent) The code has improved either time complexity or space complexity and there are no unnecessary computations. 
-performance_score: 0 (Moderate) The code has not improved time or space complexity and slightly follows checkboxes.
-performance_score: -1 (Poor) The code reduces the time or space complexity and does not follow any of the checkboxes.
+efficiency_score: 1 (Excellent) The code has improved either time complexity or space complexity and there are no unnecessary computations. 
+efficiency_score: 0 (Moderate) The code has not improved time or space complexity and slightly follows checkboxes.
+efficiency_score: -1 (Poor) The code reduces the time or space complexity and does not follow any of the checkboxes.
 """    	
     prompt+=f""" code changes for the Pull Request ID {pr_number}:### Code Changes (Diff):{diff_content}"""
 	
