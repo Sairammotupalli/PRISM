@@ -35,7 +35,7 @@ function App() {
         const avgScore = (
           (scores.readability_score || 0) +
           (scores.robustness_score || 0) +
-          (scores.performance_score || 0) +
+          (scores.efficiency_score || 0) +
           (scores.security_score || 0)
         ) / 4;
         totalScore += avgScore;
@@ -109,7 +109,7 @@ function App() {
                   <div key={prId} className="pr-row">
                     <div className="pr-title">Pull Request : {prId}</div>
                     <div className="pr-meta">
-                     Clarity: {scores.readability_score} |  Robustness: {scores.robustness_score}  | Efficiency: {scores.performance_score}  | Security: {scores.security_score}
+                     Clarity: {scores.readability_score} |  Robustness: {scores.robustness_score}  | Efficiency: {scores.efficiency_score}  | Security: {scores.security_score}
                     </div>
                     <div className="pr-score">{scores.model}</div>
                   </div>
