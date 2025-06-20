@@ -50,7 +50,8 @@ Download the "ollama_api.py" file from the repository and place it in the termin
    
    ## Move to the directory
     cd PRISM
-
+    
+   ## use the command
     uvicorn ollama_api:app --host 0.0.0.0 --port 8000 
     
    terminal 3:
