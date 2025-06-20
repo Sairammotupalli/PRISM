@@ -131,7 +131,10 @@ def analyze_with_llm(pr_number, prompt):
         message = client.messages.create(
             model="claude-3-7-sonnet-20250219",
             max_tokens=2048,
-            system="Respond only in JSON format with keys: readability_score, robustness_score, security_score, efficiency_score, output.",
+            system=(
+                "Respond only in JSON format with keys: readability_score, "
+                "robustness_score, security_score, efficiency_score, output."
+            ),
             messages=[{"role": "user", "content": prompt}]
         )
 
@@ -139,14 +142,27 @@ def analyze_with_llm(pr_number, prompt):
         print(f"\n===== Raw Response from Claude (PR_ID {pr_number}) =====\n")
         print(response_text)
 
-        # Try to parse the response as JSON
-        try:
-            response_json = json.loads(response_text)
-        except json.JSONDecodeError:
-            print("Error: Claude's response is not valid JSON.")
-            return "Error: Invalid JSON returned by Claude."
+        # Save raw response for debugging
+        with open("claude_raw_response.json", "w") as f:
+            f.write(response_text)
 
-        # Format the final output string
+        # Handle markdown code blocks like ```json ... ```
+        cleaned = re.sub(r"^```json|^```|```$", "", response_text.strip(), flags=re.MULTILINE).strip()
+
+        # Parse JSON
+        try:
+            response_json = json.loads(cleaned)
+        except json.JSONDecodeError as e:
+            print(f"Error: Could not parse JSON - {e}")
+            return "Error: Claude response not parsable."
+
+        # Validate required keys
+        expected_keys = ["readability_score", "robustness_score", "security_score", "efficiency_score", "output"]
+        if not all(k in response_json for k in expected_keys):
+            print("Error: Some expected keys are missing in Claude's output.")
+            return "Error: Incomplete response from model."
+
+        # Return formatted result
         return (
             f"Readability Score: {response_json.get('readability_score')}\n"
             f"Robustness Score: {response_json.get('robustness_score')}\n"
