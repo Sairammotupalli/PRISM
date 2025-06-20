@@ -128,27 +128,20 @@ efficiency_score: -1 (Poor) The code reduces the time or space complexity and do
     
 def analyze_with_llm(repo_name, pr_id, prompt):
     try:
-        print(f"Starting API call for {repo_name} PR {pr_id}")
-        print(f"Using model: claude-3-7-sonnet-20250219")
-        print(f"Prompt length: {len(prompt)} characters")
+        print(f"Making API call for {repo_name} PR {pr_id}...")
         
         message = client.messages.create(
             model="claude-3-7-sonnet-20250219",
             max_tokens=2048,
-            system="Respond only in JSON format with keys: readability_score, robustness_score, security_score, efficiency_score, output.",
+            system="You must respond with a single JSON object containing exactly these keys: readability_score, robustness_score, security_score, efficiency_score, output. The output field should contain a comprehensive explanation covering all four scores.",
             messages=[{"role": "user", "content": prompt}]
         )
 
-        print(f"API call completed successfully")
-        print(f"Message object: {message}")
-        print(f"Content length: {len(message.content) if message.content else 0}")
-
         if not message.content or len(message.content) == 0:
-            print("ERROR: No content in message response")
-            return None
+            print(f"No content received from API for PR {pr_id}")
+            return "Analysis failed: No response from Claude API"
 
         response_text = message.content[0].text
-        print(f"Response text length: {len(response_text)}")
         print(f"\n===== Raw Response from Claude (PR_ID {pr_id}) =====\n")
         print(response_text)
 
@@ -157,24 +150,23 @@ def analyze_with_llm(repo_name, pr_id, prompt):
             f.write(response_text)
 
         # Clean markdown formatting (```json ... ```)
-        cleaned = re.sub(r"^```json|^```|```$", "", response_text.strip(), flags=re.MULTILINE).strip()
-        print(f"Cleaned response length: {len(cleaned)}")
+        cleaned = re.sub(r"^```json\s*|^```\s*|```\s*$", "", response_text.strip(), flags=re.MULTILINE).strip()
 
         try:
             response_json = json.loads(cleaned)
-            print("JSON parsing successful")
         except json.JSONDecodeError as e:
-            print(f"JSON parsing error: {e}")
-            print(f"Cleaned text: {cleaned}")
-            return None
+            print(f"Error parsing JSON: {e}")
+            print(f"Cleaned response: {cleaned}")
+            return f"Analysis failed: Invalid JSON response - {str(e)}"
 
         # Validate keys
         expected_keys = ["readability_score", "robustness_score", "security_score", "efficiency_score", "output"]
         missing_keys = [k for k in expected_keys if k not in response_json]
+        
         if missing_keys:
-            print(f"Missing keys: {missing_keys}")
+            print(f"Missing keys in Claude response for PR {pr_id}: {missing_keys}")
             print(f"Available keys: {list(response_json.keys())}")
-            return None
+            return f"Analysis failed: Missing required keys - {missing_keys}"
 
         # Format final result
         result = (
@@ -185,12 +177,90 @@ def analyze_with_llm(repo_name, pr_id, prompt):
             f"\nExplanation:\n{response_json['output']}"
         )
         
-        print(f"Final result length: {len(result)}")
+        print(f"Analysis completed successfully for PR {pr_id}")
+        
+        # CRITICAL: Write result to pr_description.txt
+        with open("pr_description.txt", "w") as f:
+            f.write(result)
+        print("Successfully wrote result to pr_description.txt")
+        
         return result
 
     except Exception as e:
-        print(f"Exception in analyze_with_llm for {repo_name} PR_ID {pr_id}: {str(e)}")
-        print(f"Exception type: {type(e).__name__}")
-        import traceback
-        traceback.print_exc()
-        return None
+        error_msg = f"Analysis failed for {repo_name} PR {pr_id}: {str(e)}"
+        print(error_msg)
+        
+        # CRITICAL: Write error message to pr_description.txt
+        with open("pr_description.txt", "w") as f:
+            f.write(error_msg)
+        print("Wrote error message to pr_description.txt")
+        
+        return error_msg
+
+
+if __name__ == "__main__":
+    print("=== STARTING CLAUDE ANALYSIS SCRIPT ===")
+    print(f"API Key present: {bool(ANTHROPIC_API_KEY)}")
+    
+    if len(sys.argv) < 3:
+        print("Error: Missing required arguments. Usage: python main.py <diff_file_path> <pr_number>")
+        sys.exit(1)
+    
+    diff_file_path = sys.argv[1]
+    pr_number = sys.argv[2]
+    
+    try:
+        print(f"Reading diff file: {diff_file_path}")
+        with open(diff_file_path, "r") as f:
+            diff_content = f.read().strip()
+        
+        if not diff_content:
+            print("Warning: The diff file is empty. No content to process.")
+            pr_body = "No changes detected in this PR."
+            with open("pr_description.txt", "w") as f:
+                f.write(pr_body)
+        else:
+            print("Generating prompt for Claude...")
+            # Generate the prompt (this doesn't call the API, just creates the prompt)
+            prompt = generate_pr_description(diff_content, pr_number)
+            
+            print("Calling Claude API...")
+            # NOW call Claude with the prompt
+            pr_body = analyze_with_llm("repo", pr_number, prompt)
+            
+            # analyze_with_llm already writes to pr_description.txt, but let's ensure it
+            if pr_body:
+                with open("pr_description.txt", "w") as f:
+                    f.write(pr_body)
+                print("PR description saved successfully to pr_description.txt")
+            else:
+                print("Error: No response from Claude")
+                with open("pr_description.txt", "w") as f:
+                    f.write("Error: No response from Claude API")
+        
+    except FileNotFoundError:
+        print(f"Error: Diff file '{diff_file_path}' not found.")
+        error_msg = f"Error: Diff file '{diff_file_path}' not found."
+        with open("pr_description.txt", "w") as f:
+            f.write(error_msg)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected Error: {e}")
+        error_msg = f"Unexpected Error: {e}"
+        with open("pr_description.txt", "w") as f:
+            f.write(error_msg)
+        sys.exit(1)
+    
+    print("=== CLAUDE ANALYSIS SCRIPT COMPLETED ===")
+    
+    # Debug: Check if file was created
+    try:
+        with open("pr_description.txt", "r") as f:
+            content = f.read()
+            print(f"Final pr_description.txt content length: {len(content)}")
+            if len(content) > 0:
+                print("pr_description.txt has content")
+            else:
+                print("pr_description.txt is empty")
+    except FileNotFoundError:
+        print("pr_description.txt file not found")
