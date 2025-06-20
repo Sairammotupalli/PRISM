@@ -3,6 +3,7 @@ import sys
 import json
 import anthropic
 from anthropic import Anthropic
+import re
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 if not ANTHROPIC_API_KEY:
@@ -125,52 +126,47 @@ efficiency_score: -1 (Poor) The code reduces the time or space complexity and do
 	
     return prompt
     
-def analyze_with_llm(pr_number, prompt):
+def analyze_with_llm(repo_name, pr_id, prompt):
     try:
-        print(f"Sending request to Claude for PR_ID: {pr_number}")
         message = client.messages.create(
             model="claude-3-7-sonnet-20250219",
             max_tokens=2048,
-            system=(
-                "Respond only in JSON format with keys: readability_score, "
-                "robustness_score, security_score, efficiency_score, output."
-            ),
+            system="Respond only in JSON format with keys: readability_score, robustness_score, security_score, efficiency_score, output.",
             messages=[{"role": "user", "content": prompt}]
         )
 
         response_text = message.content[0].text
-        print(f"\n===== Raw Response from Claude (PR_ID {pr_number}) =====\n")
+        print(f"\n===== Raw Response from Claude (PR_ID {pr_id}) =====\n")
         print(response_text)
 
-        # Save raw response for debugging
+        # Save raw response for debug
         with open("claude_raw_response.json", "w") as f:
             f.write(response_text)
 
-        # Handle markdown code blocks like ```json ... ```
+        # Clean markdown formatting (```json ... ```)
         cleaned = re.sub(r"^```json|^```|```$", "", response_text.strip(), flags=re.MULTILINE).strip()
 
-        # Parse JSON
         try:
             response_json = json.loads(cleaned)
         except json.JSONDecodeError as e:
-            print(f"Error: Could not parse JSON - {e}")
-            return "Error: Claude response not parsable."
+            print(f"Error parsing JSON: {e}")
+            return None
 
-        # Validate required keys
+        # Validate keys
         expected_keys = ["readability_score", "robustness_score", "security_score", "efficiency_score", "output"]
         if not all(k in response_json for k in expected_keys):
-            print("Error: Some expected keys are missing in Claude's output.")
-            return "Error: Incomplete response from model."
+            print(f"Missing keys in Claude response for PR {pr_id}")
+            return None
 
-        # Return formatted result
+        # Format final result
         return (
-            f"Readability Score: {response_json.get('readability_score')}\n"
-            f"Robustness Score: {response_json.get('robustness_score')}\n"
-            f"Security Score: {response_json.get('security_score')}\n"
-            f"Efficiency Score: {response_json.get('efficiency_score')}\n"
-            f"\nExplanation:\n{response_json.get('output')}"
+            f"Readability Score: {response_json['readability_score']}\n"
+            f"Robustness Score: {response_json['robustness_score']}\n"
+            f"Security Score: {response_json['security_score']}\n"
+            f"Efficiency Score: {response_json['efficiency_score']}\n"
+            f"\nExplanation:\n{response_json['output']}"
         )
 
     except Exception as e:
-        print(f"Error processing prompt for PR_ID {pr_number}: {e}")
-        return "Error: Unable to process with Claude."
+        print(f"Error processing prompt for {repo_name} PR_ID {pr_id}: {e}")
+        return None
