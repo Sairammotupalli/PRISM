@@ -1,27 +1,12 @@
-# Program to check if a number is prime or not
+arr = [0, -1, 2, -3, 1]
+target = -2
 
-num = 29
+def twoSum(arr, target):
+    n = len(arr)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if arr[i] + arr[k] == target:
+                return Tru
+    return False
 
-# To take input from the user
-#num = int(input("Enter a number: "))
-
-# define a flag variable
-flag = False
-
-if num == 0 or num == 1:
-    print(num, "is not a prime number")
-elif num > 1:
-    # check for factors
-    for i in range(2, num):
-        if (num % i) == 0:
-            # if factor is found, set flag to True
-            flag = True
-            # break out of loop
-            break
-
-    # check if flag is True
-    if flag:
-        print(num, "is not a prime number")
-    else:
-        print(num, "is a prime number")
-wsdew
+print(twoSum(arr, target))
