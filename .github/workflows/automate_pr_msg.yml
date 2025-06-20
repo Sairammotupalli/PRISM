@@ -87,4 +87,4 @@ jobs:
         run: |
           echo "Uploading scores to Firebase..."
           MODEL=$(python3 -c "import json; print(json.load(open('model_config.json'))['model'])")
-          python3 firebase/upload_scores.py pr_description.txt "$GITHUB_USER" "${{ github.event.pull_request.number }}" “$MODEL"
+          python3 firebase/upload_scores.py pr_description.txt "$GITHUB_USER" "${{ github.event.pull_request.number }}" "$MODEL"
