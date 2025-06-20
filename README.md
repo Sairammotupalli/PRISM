@@ -107,4 +107,4 @@ This browser extension adds a **PR Scores** tab to the top of any GitHub reposit
 4. you'll see a **PR Scores** tab in your repository.
 
 
-#### Hurray!! Now you are ready to use the PRISM 
+#### Hurray!! Now you are ready to use the PRISM.
