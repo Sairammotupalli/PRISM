@@ -3,10 +3,8 @@ import json
 import requests
 import os
 
-def update_firebase(user, pr_id, new_scores, firebase_url, model, repo_name):
-    # Sanitize the repo_name to be a valid Firebase key
-    safe_repo_name = repo_name.replace('/', '--')
-    base_url = f"{firebase_url}/repositories/{safe_repo_name}/users/{user}"
+def update_firebase(user, pr_id, new_scores, firebase_url, model):
+    base_url = f"{firebase_url}/users/{user}"
     pr_url = f"{base_url}/pr_{pr_id}.json"
     cumulative_url = f"{base_url}/cumulative_score.json"
 
@@ -40,15 +38,14 @@ def update_firebase(user, pr_id, new_scores, firebase_url, model, repo_name):
         print(f"Failed to update cumulative score: {cum_response.text}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 6:
-        print("Usage: python upload_scores.py <pr_message_file> <github_user> <pr_id> <model> <repo_name>")
+    if len(sys.argv) < 5:
+        print("Usage: python upload_scores.py <pr_message_file> <github_user> <pr_id> <model>")
         sys.exit(1)
 
     pr_file = sys.argv[1]
     user = sys.argv[2]
     pr_id = sys.argv[3]
     model = sys.argv[4]
-    repo_name = sys.argv[5] # Added repo_name
     firebase_url = os.getenv("FIREBASE_URL")
 
     if not firebase_url:
@@ -81,7 +78,7 @@ if __name__ == "__main__":
         print(f"Extracted Scores: {scores}")
 
         if all(v is not None for v in scores.values()):
-            update_firebase(user, pr_id, scores, firebase_url, model, repo_name)
+            update_firebase(user, pr_id, scores, firebase_url, model)
         else:
             print("Not all scores found. Skipping Firebase upload.")
 
