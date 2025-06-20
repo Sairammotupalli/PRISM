@@ -80,11 +80,11 @@ jobs:
               });
             }
 
-      - name: Upload Scores to Firebase
+     - name: Upload Scores to Firebase
         env:
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
           GITHUB_USER: ${{ github.event.pull_request.user.login }}
         run: |
           echo "Uploading scores to Firebase..."
           MODEL=$(python3 -c "import json; print(json.load(open('model_config.json'))['model'])")
-          python3 firebase/upload_scores.py pr_description.txt "$GITHUB_USER" "${{ github.event.pull_request.number }}" "$MODEL" "${{ github.repository }}"
+          python3 firebase/upload_scores.py pr_description.txt "$GITHUB_USER" "${{ github.event.pull_request.number }}" “$MODEL"
