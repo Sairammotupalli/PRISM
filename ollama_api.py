@@ -39,14 +39,14 @@ def generate_text(request: PromptRequest):
                 "properties": {
                     "readability_score": {"type": "integer", "enum": [-1, 0, 1]},
                     "robustness_score": {"type": "integer", "enum": [-1, 0, 1]},
-                    "security_score": {"type": "integer", "enum": [-1, 0, 1]},
+                    "vulnerability_score": {"type": "integer", "enum": [-1, 0, 1]},
                     "performance_score": {"type": "integer", "enum": [-1, 0, 1]},
                     "output": {"type": "string"}
                 },
                 "required": [
                     "readability_score",
                     "robustness_score",
-                    "security_score",
+                    "vulnerability_score",
                     "performance_score",
                     "output"
                 ]
@@ -68,7 +68,7 @@ def generate_text(request: PromptRequest):
                 parsed_output = {
                     "readability_score": 2,
                     "robustness_score": 2,
-                    "security_score": 2,
+                    "vulnerability_score": 2,
                     "performance_score": 2,
                     "output": "Error decoding response."
                 }
