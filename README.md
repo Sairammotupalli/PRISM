@@ -80,7 +80,7 @@ and paste the firebase url in Repoitory secrets with Name: FIREBASE_URL and Secr
 <br>
 
 
-## 5. Build and deploy Appliation using Github pages (terminal 1)
+## 5. Build and deploy Application using Github pages (terminal 1)
 
    #### Install npm:
     npm install
