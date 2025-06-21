@@ -135,8 +135,8 @@ efficiency_score: -1 (Poor) The code reduces the time or space complexity and do
             return (
                 f"Readability Score: {generated.get('readability_score')}\n"
                 f"Robustness Score: {generated.get('robustness_score')}\n"
-                f"vulnerability Score: {generated.get('vulnerability_score')}\n"
-                f"efficiency Score: {generated.get('efficiency_score')}\n"
+                f"Vulnerability Score: {generated.get('vulnerability_score')}\n"
+                f"Efficiency Score: {generated.get('efficiency_score')}\n"
                 f"\nExplanation:\n{generated.get('output')}"
             )
 
