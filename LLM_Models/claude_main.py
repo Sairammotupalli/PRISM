@@ -1,4 +1,4 @@
-import os
+Simport os
 import sys
 import json
 import anthropic
@@ -160,7 +160,7 @@ def analyze_with_llm(repo_name, pr_id, prompt):
             return f"Analysis failed: Invalid JSON response - {str(e)}"
 
         # Validate keys
-        expected_keys = ["readability_score", "robustness_score", "vulnerability _score", "efficiency_score", "output"]
+        expected_keys = ["readability_score", "robustness_score", "vulnerability_score", "efficiency_score", "output"]
         missing_keys = [k for k in expected_keys if k not in response_json]
         
         if missing_keys:
