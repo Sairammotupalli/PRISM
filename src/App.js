@@ -30,7 +30,7 @@ function App() {
     let readabilityTotal = 0;
     let robustnessTotal = 0;
     let efficiencyTotal = 0;
-    let securityTotal = 0;
+    let vulnerabilityTotal = 0;
     let validPRCount = 0;
   
     Object.entries(userData).forEach(([key, scores]) => {
@@ -39,13 +39,13 @@ function App() {
           typeof scores.readability_score === 'number' ||
           typeof scores.robustness_score === 'number' ||
           typeof scores.efficiency_score === 'number' ||
-          typeof scores.security_score === 'number';
+          typeof scores.vulnerability_score === 'number';
   
         if (hasAtLeastOneScore) {
           readabilityTotal += scores.readability_score || 0;
           robustnessTotal += scores.robustness_score || 0;
           efficiencyTotal += scores.efficiency_score || 0;
-          securityTotal += scores.security_score || 0;
+          vulnerabilityTotal += scores.vulnerability_score || 0;
           validPRCount++;
         }
       }
@@ -56,7 +56,7 @@ function App() {
         readability: 'N/A',
         robustness: 'N/A',
         efficiency: 'N/A',
-        security: 'N/A'
+        vulnerability: 'N/A'
       };
     }
   
@@ -64,7 +64,7 @@ function App() {
       readability: (readabilityTotal / validPRCount).toFixed(2),
       robustness: (robustnessTotal / validPRCount).toFixed(2),
       efficiency: (efficiencyTotal / validPRCount).toFixed(2),
-      security: (securityTotal / validPRCount).toFixed(2)
+      vulnerability: (vulnerabilityTotal / validPRCount).toFixed(2)
     };
   };
   
