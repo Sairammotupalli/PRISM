@@ -59,7 +59,7 @@ if __name__ == "__main__":
         scores = {
             "readability_score": None,
             "robustness_score": None,
-            "security_score": None,
+            "vulnerability_score": None,
             "efficiency_score": None
         }
 
@@ -68,8 +68,8 @@ if __name__ == "__main__":
                 scores["readability_score"] = int(line.split(":")[1].strip())
             elif line.lower().startswith("robustness score:"):
                 scores["robustness_score"] = int(line.split(":")[1].strip())
-            elif line.lower().startswith("security score:"):
-                scores["security_score"] = int(line.split(":")[1].strip())
+            elif line.lower().startswith("vulnerability score:"):
+                scores["vulnerability_score"] = int(line.split(":")[1].strip())
             elif line.lower().startswith("efficiency score:"):
                 scores["efficiency_score"] = int(line.split(":")[1].strip())
 

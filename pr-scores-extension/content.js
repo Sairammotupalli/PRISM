@@ -274,7 +274,7 @@ function renderScores() {
             <span class="score-item">Readability: ${cumulativeScores.readability}</span>
             <span class="score-item">Robustness: ${cumulativeScores.robustness}</span>
             <span class="score-item">Efficiency: ${cumulativeScores.efficiency}</span>
-            <span class="score-item">Security: ${cumulativeScores.security}</span>
+            <span class="score-item">Vulnerability: ${cumulativeScores.vulnerability}</span>
           </div>
         </div>
         <div class="pr-list">
@@ -282,10 +282,10 @@ function renderScores() {
             <div class="pr-row">
               <div class="pr-title">Pull Request #${prId.replace('pr_', '')}</div>
               <div class="pr-meta">
-                <span>Clarity: ${scores.readability_score || 'N/A'}</span>
+                <span>Readability: ${scores.readability_score || 'N/A'}</span>
                 <span>Robustness: ${scores.robustness_score || 'N/A'}</span>
                 <span>Efficiency: ${scores.efficiency_score || 'N/A'}</span>
-                <span>Security: ${scores.security_score || 'N/A'}</span>
+                <span>Vulnerability: ${scores.vulnerability_score || 'N/A'}</span>
               </div>
               <div class="pr-score">${scores.model || 'N/A'}</div>
             </div>
@@ -300,22 +300,22 @@ function renderScores() {
 
 // Calculate cumulative scores (no changes needed here)
 function calculateCumulativeScores(userData) {
-    let readabilityTotal = 0, robustnessTotal = 0, efficiencyTotal = 0, securityTotal = 0, prCount = 0;
+    let readabilityTotal = 0, robustnessTotal = 0, efficiencyTotal = 0, vulnerabilityTotal = 0, prCount = 0;
     Object.entries(userData).forEach(([key, scores]) => {
       if (key !== 'cumulative_score') {
         readabilityTotal += scores.readability_score || 0;
         robustnessTotal += scores.robustness_score || 0;
         efficiencyTotal += scores.efficiency_score || 0;
-        securityTotal += scores.security_score || 0;
+        vulnerabilityTotal += scores.vulnerability_score || 0;
         prCount++;
       }
     });
-    if (prCount === 0) return { readability: 'N/A', robustness: 'N/A', efficiency: 'N/A', security: 'N/A' };
+    if (prCount === 0) return { readability: 'N/A', robustness: 'N/A', efficiency: 'N/A', vulnerability: 'N/A' };
     return {
       readability: (readabilityTotal / prCount).toFixed(2),
       robustness: (robustnessTotal / prCount).toFixed(2),
       efficiency: (efficiencyTotal / prCount).toFixed(2),
-      security: (securityTotal / prCount).toFixed(2)
+      vulnerability: (vulnerabilityTotal / prCount).toFixed(2)
     };
 }
 

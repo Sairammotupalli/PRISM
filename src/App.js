@@ -31,19 +31,27 @@ function App() {
     let robustnessTotal = 0;
     let efficiencyTotal = 0;
     let securityTotal = 0;
-    let prCount = 0;
-
+    let validPRCount = 0;
+  
     Object.entries(userData).forEach(([key, scores]) => {
       if (key !== 'cumulative_score') {
-        readabilityTotal += scores.readability_score || 0;
-        robustnessTotal += scores.robustness_score || 0;
-        efficiencyTotal += scores.efficiency_score || 0;
-        securityTotal += scores.security_score || 0;
-        prCount++;
+        const hasAtLeastOneScore =
+          typeof scores.readability_score === 'number' ||
+          typeof scores.robustness_score === 'number' ||
+          typeof scores.efficiency_score === 'number' ||
+          typeof scores.security_score === 'number';
+  
+        if (hasAtLeastOneScore) {
+          readabilityTotal += scores.readability_score || 0;
+          robustnessTotal += scores.robustness_score || 0;
+          efficiencyTotal += scores.efficiency_score || 0;
+          securityTotal += scores.security_score || 0;
+          validPRCount++;
+        }
       }
     });
-
-    if (prCount === 0) {
+  
+    if (validPRCount === 0) {
       return {
         readability: 'N/A',
         robustness: 'N/A',
@@ -51,14 +59,15 @@ function App() {
         security: 'N/A'
       };
     }
-
+  
     return {
-      readability: (readabilityTotal / prCount).toFixed(2),
-      robustness: (robustnessTotal / prCount).toFixed(2),
-      efficiency: (efficiencyTotal / prCount).toFixed(2),
-      security: (securityTotal / prCount).toFixed(2)
+      readability: (readabilityTotal / validPRCount).toFixed(2),
+      robustness: (robustnessTotal / validPRCount).toFixed(2),
+      efficiency: (efficiencyTotal / validPRCount).toFixed(2),
+      security: (securityTotal / validPRCount).toFixed(2)
     };
   };
+  
 
   const sortedUsers = Object.entries(users).sort(([a], [b]) => {
     if (sortBy === 'user') return a.localeCompare(b);
@@ -119,7 +128,7 @@ function App() {
                   <span className="score-item">Readability: {calculateCumulativeScores(data).readability}</span>
                   <span className="score-item">Robustness: {calculateCumulativeScores(data).robustness}</span>
                   <span className="score-item">Efficiency: {calculateCumulativeScores(data).efficiency}</span>
-                  <span className="score-item">Security: {calculateCumulativeScores(data).security}</span>
+                  <span className="score-item">Vulnerability: {calculateCumulativeScores(data).vulnerability}</span>
                 </div>
               </div>
 
@@ -128,7 +137,7 @@ function App() {
                   <div key={prId} className="pr-row">
                     <div className="pr-title">Pull Request : {prId}</div>
                     <div className="pr-meta">
-                     Clarity: {scores.readability_score} |  Robustness: {scores.robustness_score}  | Efficiency: {scores.efficiency_score}  | Security: {scores.security_score}
+                     Readability Score: {scores.readability_score} |  Robustness Score: {scores.robustness_score}  | Efficiency Score: {scores.efficiency_score}  | Vulnerability Score: {scores.vulnerability_score}
                     </div>
                     <div className="pr-score">{scores.model}</div>
                   </div>

@@ -76,7 +76,7 @@ Scoring Criteria:
 3. Analyze and give an overall score for the updated code based on Security and Vulnerability. 
 The return format should be in the below json format:
 {{
-    "security_score": “<score>”,
+    "vulnerability_score": “<score>”,
     "output": "<text explanation for the score>”
 }}
 
@@ -92,9 +92,9 @@ Checkboxes:
 5. Proper Session Management (Session expiration is perfect and handle token handling securely)
 
 Scoring Criteria:
-	security_score: 1 (Excellent) No security or vulnerability issues and follows all the checkboxes.
-	security_score: 0 (Moderate) A few security or vulnerability issues and mostly follows checkboxes.
-	security_score: -1 (Poor) A lot of security and vulnerability issues and does not follows all checkboxes.
+	vulnerability_score: 1 (Excellent) No security or vulnerability issues and follows all the checkboxes.
+	vulnerability_score: 0 (Moderate) A few security or vulnerability issues and mostly follows checkboxes.
+	vulnerability_score: -1 (Poor) A lot of security and vulnerability issues and does not follows all checkboxes.
 """
     
     prompt+="""
@@ -133,7 +133,7 @@ def analyze_with_llm(repo_name, pr_id, prompt):
         message = client.messages.create(
             model="claude-3-7-sonnet-20250219",
             max_tokens=2048,
-            system="You must respond with a single JSON object containing exactly these keys: readability_score, robustness_score, security_score, efficiency_score, output. The output field should contain a comprehensive explanation covering all four scores.",
+            system="You must respond with a single JSON object containing exactly these keys: readability_score, robustness_score, vulnerability_score, efficiency_score, output. The output field should contain a comprehensive explanation covering all four scores.",
             messages=[{"role": "user", "content": prompt}]
         )
 
@@ -172,7 +172,7 @@ def analyze_with_llm(repo_name, pr_id, prompt):
         result = (
             f"Readability Score: {response_json['readability_score']}\n"
             f"Robustness Score: {response_json['robustness_score']}\n"
-            f"Security Score: {response_json['security_score']}\n"
+            f"Vulnerability Score: {response_json['vulnerability_score']}\n"
             f"Efficiency Score: {response_json['efficiency_score']}\n"
             f"\nExplanation:\n{response_json['output']}"
         )
