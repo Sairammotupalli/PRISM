@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/PRISM/static/css/main.3f2b9b74.css",
-    "main.js": "/PRISM/static/js/main.dffb335a.js",
+    "main.css": "/PRISM/static/css/main.71bec544.css",
+    "main.js": "/PRISM/static/js/main.dc8d205b.js",
     "static/js/453.e628a787.chunk.js": "/PRISM/static/js/453.e628a787.chunk.js",
     "index.html": "/PRISM/index.html",
-    "main.3f2b9b74.css.map": "/PRISM/static/css/main.3f2b9b74.css.map",
-    "main.dffb335a.js.map": "/PRISM/static/js/main.dffb335a.js.map",
+    "main.71bec544.css.map": "/PRISM/static/css/main.71bec544.css.map",
+    "main.dc8d205b.js.map": "/PRISM/static/js/main.dc8d205b.js.map",
     "453.e628a787.chunk.js.map": "/PRISM/static/js/453.e628a787.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.3f2b9b74.css",
-    "static/js/main.dffb335a.js"
+    "static/css/main.71bec544.css",
+    "static/js/main.dc8d205b.js"
   ]
 }
