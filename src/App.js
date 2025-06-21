@@ -30,7 +30,7 @@ function App() {
     let readabilityTotal = 0;
     let robustnessTotal = 0;
     let efficiencyTotal = 0;
-    let securityTotal = 0;
+    let vulnerabilityTotal = 0;
     let validPRCount = 0;
   
     const isValidScore = (val) => val === -1 || val === 0 || val === 1;
@@ -40,7 +40,7 @@ function App() {
         const r = scores.readability_score;
         const b = scores.robustness_score;
         const e = scores.efficiency_score;
-        const s = scores.security_score;
+        const s = scores.vulnerability_score;
   
         const allValid =
           isValidScore(r) &&
@@ -52,7 +52,7 @@ function App() {
           readabilityTotal += r;
           robustnessTotal += b;
           efficiencyTotal += e;
-          securityTotal += s;
+          vulnerabilityTotal += s;
           validPRCount++;
         }
       }
@@ -63,7 +63,7 @@ function App() {
         readability: 'N/A',
         robustness: 'N/A',
         efficiency: 'N/A',
-        security: 'N/A'
+        vulnerability: 'N/A'
       };
     }
   
@@ -71,7 +71,7 @@ function App() {
       readability: (readabilityTotal / validPRCount).toFixed(2),
       robustness: (robustnessTotal / validPRCount).toFixed(2),
       efficiency: (efficiencyTotal / validPRCount).toFixed(2),
-      security: (securityTotal / validPRCount).toFixed(2)
+      vulnerability: (vulnerabilityTotal / validPRCount).toFixed(2)
     };
   };
 
