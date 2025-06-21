@@ -70,7 +70,7 @@ Scoring Criteria:
 3. Analyze and give an overall score for the updated code based on Security and Vulnerability. 
 The return format should be in the below json format:
 {{
-    "security_score": “<score>”,
+    "vulnerability_score": “<score>”,
     "output": "<text explanation for the score>”
 }}
 
@@ -86,9 +86,9 @@ Checkboxes:
 5. Proper Session Management (Session expiration is perfect and handle token handling securely)
 
 Scoring Criteria:
-	security_score: 1 (Excellent) No security or vulnerability issues and follows all the checkboxes.
-	security_score: 0 (Moderate) A few security or vulnerability issues and mostly follows checkboxes.
-	security_score: -1 (Poor) A lot of security and vulnerability issues and does not follows all checkboxes.
+	vulnerability_score: 1 (Excellent) No security or vulnerability issues and follows all the checkboxes.
+	vulnerability_score: 0 (Moderate) A few security or vulnerability issues and mostly follows checkboxes.
+	vulnerability_score: -1 (Poor) A lot of security and vulnerability issues and does not follows all checkboxes.
 """
     
     prompt+="""
@@ -135,7 +135,7 @@ efficiency_score: -1 (Poor) The code reduces the time or space complexity and do
             return (
                 f"Readability Score: {generated.get('readability_score')}\n"
                 f"Robustness Score: {generated.get('robustness_score')}\n"
-                f"Security Score: {generated.get('security_score')}\n"
+                f"vulnerability Score: {generated.get('vulnerability_score')}\n"
                 f"efficiency Score: {generated.get('efficiency_score')}\n"
                 f"\nExplanation:\n{generated.get('output')}"
             )
