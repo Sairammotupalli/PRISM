@@ -22,9 +22,10 @@ function App() {
         setUsers(snapshot.val());
       }
     };
-
     fetchData();
   }, []);
+
+  const isValidScore = (val) => val === -1 || val === 0 || val === 1;
 
   const calculateCumulativeScores = (userData) => {
     let readabilityTotal = 0;
@@ -32,32 +33,26 @@ function App() {
     let efficiencyTotal = 0;
     let vulnerabilityTotal = 0;
     let validPRCount = 0;
-  
-    const isValidScore = (val) => val === -1 || val === 0 || val === 1;
-  
+
     Object.entries(userData).forEach(([key, scores]) => {
       if (key !== 'cumulative_score' && typeof scores === 'object') {
         const r = scores.readability_score;
         const b = scores.robustness_score;
         const e = scores.efficiency_score;
-        const s = scores.vulnerability_score;
-  
-        const allValid =
-          isValidScore(r) &&
-          isValidScore(b) &&
-          isValidScore(e) &&
-          isValidScore(s);
-  
+        const v = scores.vulnerability_score;
+
+        const allValid = [r, b, e, v].every(isValidScore);
+
         if (allValid) {
           readabilityTotal += r;
           robustnessTotal += b;
           efficiencyTotal += e;
-          vulnerabilityTotal += s;
+          vulnerabilityTotal += v;
           validPRCount++;
         }
       }
     });
-  
+
     if (validPRCount === 0) {
       return {
         readability: 'N/A',
@@ -66,7 +61,7 @@ function App() {
         vulnerability: 'N/A'
       };
     }
-  
+
     return {
       readability: (readabilityTotal / validPRCount).toFixed(2),
       robustness: (robustnessTotal / validPRCount).toFixed(2),
@@ -81,22 +76,21 @@ function App() {
   });
 
   return (
-    
     <div className="github-wrapper">
-    <div className="back-wrapper">
-      <a
-        href="https://github.com/Sairammotupalli/PRISM"
-        className="back-button"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        ← Back
-      </a>
-    </div>
+      <div className="back-wrapper">
+        <a
+          href="https://github.com/Sairammotupalli/PRISM"
+          className="back-button"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ← Back
+        </a>
+      </div>
 
-    <div className="github-header">
-      <h2>Pull Request Scores</h2>
-  </div>
+      <div className="github-header">
+        <h2>Pull Request Scores</h2>
+      </div>
 
       <div className="github-body">
         <div className="controls-bar">
@@ -126,24 +120,29 @@ function App() {
 
           if (prEntries.length === 0) return null;
 
+          const cumulative = calculateCumulativeScores(data);
+
           return (
             <div key={user} className="user-section">
               <div className="user-header">
                 Contributor: {user}
                 <div className="cumulative-scores">
-                  <span className="score-item">Readability: {calculateCumulativeScores(data).readability}</span>
-                  <span className="score-item">Robustness: {calculateCumulativeScores(data).robustness}</span>
-                  <span className="score-item">Efficiency: {calculateCumulativeScores(data).efficiency}</span>
-                  <span className="score-item">Vulnerability: {calculateCumulativeScores(data).vulnerability}</span>
+                  <span className="score-item">Readability: {cumulative.readability}</span>
+                  <span className="score-item">Robustness: {cumulative.robustness}</span>
+                  <span className="score-item">Efficiency: {cumulative.efficiency}</span>
+                  <span className="score-item">Vulnerability: {cumulative.vulnerability}</span>
                 </div>
               </div>
 
               <div className="pr-list">
                 {prEntries.map(([prId, scores]) => (
                   <div key={prId} className="pr-row">
-                    <div className="pr-title">Pull Request : {prId}</div>
+                    <div className="pr-title">Pull Request: {prId}</div>
                     <div className="pr-meta">
-                     Readability Score: {scores.readability_score} |  Robustness Score: {scores.robustness_score}  | Efficiency Score: {scores.efficiency_score}  | Vulnerability Score: {scores.vulnerability_score}
+                      Readability Score: {scores.readability_score} |  
+                      Robustness Score: {scores.robustness_score} |  
+                      Efficiency Score: {scores.efficiency_score} |  
+                      Vulnerability Score: {scores.vulnerability_score}
                     </div>
                     <div className="pr-score">{scores.model}</div>
                   </div>
