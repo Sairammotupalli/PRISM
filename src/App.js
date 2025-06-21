@@ -33,19 +33,26 @@ function App() {
     let securityTotal = 0;
     let validPRCount = 0;
   
-    Object.entries(userData).forEach(([key, scores]) => {
-      if (key !== 'cumulative_score') {
-        const hasAtLeastOneScore =
-          typeof scores.readability_score === 'number' ||
-          typeof scores.robustness_score === 'number' ||
-          typeof scores.efficiency_score === 'number' ||
-          typeof scores.security_score === 'number';
+    const isValidScore = (val) => val === -1 || val === 0 || val === 1;
   
-        if (hasAtLeastOneScore) {
-          readabilityTotal += scores.readability_score || 0;
-          robustnessTotal += scores.robustness_score || 0;
-          efficiencyTotal += scores.efficiency_score || 0;
-          securityTotal += scores.security_score || 0;
+    Object.entries(userData).forEach(([key, scores]) => {
+      if (key !== 'cumulative_score' && typeof scores === 'object') {
+        const r = scores.readability_score;
+        const b = scores.robustness_score;
+        const e = scores.efficiency_score;
+        const s = scores.security_score;
+  
+        const allValid =
+          isValidScore(r) &&
+          isValidScore(b) &&
+          isValidScore(e) &&
+          isValidScore(s);
+  
+        if (allValid) {
+          readabilityTotal += r;
+          robustnessTotal += b;
+          efficiencyTotal += e;
+          securityTotal += s;
           validPRCount++;
         }
       }
@@ -67,7 +74,6 @@ function App() {
       security: (securityTotal / validPRCount).toFixed(2)
     };
   };
-  
 
   const sortedUsers = Object.entries(users).sort(([a], [b]) => {
     if (sortBy === 'user') return a.localeCompare(b);
