@@ -26,60 +26,31 @@ function App() {
     fetchData();
   }, []);
 
-  const calculateCumulativeScores = (userData) => {
-    let readabilityTotal = 0;
-    let robustnessTotal = 0;
-    let efficiencyTotal = 0;
-    let vulnerabilityTotal = 0;
-    let validPRCount = 0;
-  
-    const isValidScore = (val) => val === -1 || val === 0 || val === 1;
-  
+  const calculateOverallScore = (userData) => {
+    let totalScore = 0;
+    let prCount = 0;
+
     Object.entries(userData).forEach(([key, scores]) => {
-      if (key !== 'cumulative_score' && typeof scores === 'object') {
-        const r = scores.readability_score;
-        const b = scores.robustness_score;
-        const e = scores.efficiency_score;
-        const s = scores.vulnerability_score;
-  
-        const allValid =
-          isValidScore(r) &&
-          isValidScore(b) &&
-          isValidScore(e) &&
-          isValidScore(s);
-  
-        if (allValid) {
-          readabilityTotal += r;
-          robustnessTotal += b;
-          efficiencyTotal += e;
-          vulnerabilityTotal += s;
-          validPRCount++;
-        }
+      if (key !== 'cumulative_score') {
+        const avgScore = (
+          (scores.readability_score || 0) +
+          (scores.robustness_score || 0) +
+          (scores.efficiency_score || 0) +
+          (scores.security_score || 0)
+        ) / 4;
+        totalScore += avgScore;
+        prCount++;
       }
     });
-  
-    if (validPRCount === 0) {
-      return {
-        readability: 'N/A',
-        robustness: 'N/A',
-        efficiency: 'N/A',
-        vulnerability: 'N/A'
-      };
-    }
-  
-    return {
-      readability: (readabilityTotal / validPRCount).toFixed(2),
-      robustness: (robustnessTotal / validPRCount).toFixed(2),
-      efficiency: (efficiencyTotal / validPRCount).toFixed(2),
-      vulnerability: (vulnerabilityTotal / validPRCount).toFixed(2)
-    };
+
+    return prCount > 0 ? (totalScore / prCount).toFixed(2) : 'N/A';
   };
 
   const sortedUsers = Object.entries(users).sort(([a], [b]) => {
     if (sortBy === 'user') return a.localeCompare(b);
     return 0;
   });
-
+  
   return (
     
     <div className="github-wrapper">
