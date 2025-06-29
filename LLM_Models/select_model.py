@@ -9,7 +9,7 @@ MODEL_MAP = {
 }
 
 def main():
-    model = "mistral"
+    model = "claude"
     path = MODEL_MAP.get(model)
     
     if not path:
